@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task List</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .task { margin-bottom: 10px; padding: 10px; border: 1px solid #ccc; }
+    #task-list { margin-top: 20px; }
+    #task-form { margin-top: 20px; }
+    input, textarea { display: block; margin-bottom: 10px; width: 100%; padding: 8px; }
+    button { padding: 10px 20px; }
+  </style>
+</head>
+<body>
+  <h1>Task List</h1>
+
+  <!-- Form to create a new task -->
+  <div id="task-form">
+    <h2>Create New Task</h2>
+    <form id="new-task-form">
+      <input type="text" id="task-title" placeholder="Task Title" required />
+      <textarea id="task-description" placeholder="Task Description" required></textarea>
+      <button type="submit">Create Task</button>
+    </form>
+  </div>
+
+  <!-- Task list display -->
+  <div id="task-list"></div>
+
+  <script>
+    $(document).ready(function () {
+      // Function to fetch tasks
+      function fetchTasks() {
+        $.ajax({
+          url: 'http://localhost:3000/api/tasks',
+          method: 'GET',
+          success: function (response) {
+            $('#task-list').empty(); // Clear the task list
+            response.data.forEach(task => {
+              $('#task-list').append(`
+                <div class="task">
+                  <h3>Id: ${task.id}</h3>
+                  <h3>${task.title}</h3>
+                  <p>${task.description}</p>
+                  <p>Status: ${task.status}</p>
+                </div>
+              `);
+            });
+          },
+          error: function (err) {
+            console.error('Error fetching tasks:', err);
+          }
+        });
+      }
+
+      // Fetch tasks on page load
+      fetchTasks();
+
+      // Handle form submission
+      $('#new-task-form').on('submit', function (e) {
+        e.preventDefault(); // Prevent form reload
+        const newTask = {
+          title: $('#task-title').val(),
+          description: $('#task-description').val(),
+          status: 'Pending', // Default status
+        };
+
+        $.ajax({
+          url: 'http://localhost:3000/api/tasks',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify(newTask),
+          success: function () {
+            $('#task-title').val(''); // Clear the form fields
+            $('#task-description').val('');
+            fetchTasks(); // Refresh the task list
+          },
+          error: function (err) {
+            console.error('Error creating task:', err);
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

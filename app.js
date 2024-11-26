@@ -1,6 +1,8 @@
 const express = require('express');
+const cors = require('cors'); // Import cors
 const app = express();
 
+app.use(cors()); // Allow all origins
 // Middleware để xử lý JSON
 app.use(express.json());
 
